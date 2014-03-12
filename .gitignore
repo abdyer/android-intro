@@ -1,4 +1,13 @@
-.gradle
-/local.properties
-/.idea/workspace.xml
 .DS_Store
+.svn
+*.class
+*.iml
+.metadata
+.gradle
+.idea/*
+build/*
+out/*
+
+local.properties
+
+app/build/*
