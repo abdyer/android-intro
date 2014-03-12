@@ -19,4 +19,6 @@ android {
 }
 
 dependencies {
+    compile 'com.mcxiaoke.volley:library:1.0.+@aar'
+    compile 'com.google.code.gson:gson:2.2.4'
 }
