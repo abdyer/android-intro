@@ -2,11 +2,13 @@ package com.example.app;
 
 import android.app.ListFragment;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,8 +51,15 @@ public class EventListFragment extends ListFragment implements Response.Listener
     public void onResponse(EventsResponse response) {
         getActivity().setProgressBarIndeterminateVisibility(false);
         setListShown(true);
-        EventsAdapter adapter = new EventsAdapter(getActivity(), response);
+        final EventsAdapter adapter = new EventsAdapter(getActivity(), response);
         getListView().setAdapter(adapter);
+        getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Event event = adapter.getItem(position);
+                launchWebViewActivity(event.getRepo().getName());
+            }
+        });
     }
 
     @Override
@@ -78,11 +87,17 @@ public class EventListFragment extends ListFragment implements Response.Listener
                 holder = ViewHolder.class.cast(convertView.getTag());
             }
 
-            Event event = getItem(position);
+            final Event event = getItem(position);
             String line1 = String.format("%s by %s", event.getType(), event.getActor().getLogin());
             holder.textLine1.setText(line1);
             holder.textLine2.setText(getRelativeTime(event.getCreatedAt()));
             holder.avatar.setImageUrl(event.getActor().getAvatarUrl(), GithubEventsApp.getImageLoader());
+            holder.avatar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    launchWebViewActivity(event.getActor().getLogin());
+                }
+            });
 
             return convertView;
         }
@@ -112,5 +127,13 @@ public class EventListFragment extends ListFragment implements Response.Listener
         public ViewHolder(View view) {
             ButterKnife.inject(this, view);
         }
+    }
+
+    private void launchWebViewActivity(String path) {
+        String url = String.format("http://github.com/%s", path);
+        Intent intent = new Intent(getActivity(), WebViewActivity.class);
+        intent.putExtra(WebViewActivity.EXTRA_TITLE, path);
+        intent.putExtra(WebViewActivity.EXTRA_URL, url);
+        startActivity(intent);
     }
 }
